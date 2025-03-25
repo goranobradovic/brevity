@@ -1,67 +1,63 @@
+from flask import Flask, render_template
 import os
-from flask import Flask, render_template, send_from_directory
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_login import LoginManager
 from dotenv import load_dotenv
-import datetime
+from extensions import db, migrate, login_manager
 
+# Load environment variables
 load_dotenv()
 
-db = SQLAlchemy()
-migrate = Migrate()
-login_manager = LoginManager()
-
+# Create app
 def create_app():
     app = Flask(__name__)
-    
+
     # Configuration
-    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-for-brevity')
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI', 'sqlite:///brevity.db')
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI', 'sqlite:///brevity.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    
-    # Initialize extensions
+
+    # Initialize extensions with app
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
-    login_manager.login_view = 'auth.login'
-    
+
+    # Import routes and models (must be after db initialization to avoid circular imports)
+    from routes.main import main
+    from routes.auth import auth
+    from routes.posts import posts
+    from models import User, Post, Settings
+
     # Register blueprints
-    from routes.main import main_bp
-    from routes.auth import auth_bp
-    from routes.posts import posts_bp
-    
-    app.register_blueprint(main_bp)
-    app.register_blueprint(auth_bp, url_prefix='/auth')
-    app.register_blueprint(posts_bp, url_prefix='/posts')
-    
-    # Favicon handling
-    @app.route('/favicon.ico')
-    def favicon():
-        return send_from_directory(os.path.join(app.root_path, 'static'),
-                                  'favicon.ico', mimetype='image/vnd.microsoft.icon')
-    
-    @app.route('/favicon.svg')
-    def favicon_svg():
-        return send_from_directory(os.path.join(app.root_path, 'static', 'img'),
-                                  'favicon.svg', mimetype='image/svg+xml')
-    
-    # Add context processor for templates
-    @app.context_processor
-    def inject_now():
-        return {'now': datetime.datetime.utcnow()}
-    
+    app.register_blueprint(main)
+    app.register_blueprint(auth)
+    app.register_blueprint(posts)
+
+    # Create tables
+    with app.app_context():
+        db.create_all()
+
     # Error handlers
     @app.errorhandler(404)
-    def page_not_found(error):
+    def not_found_error(error):
         return render_template('errors/404.html'), 404
-    
+
     @app.errorhandler(500)
-    def internal_server_error(error):
+    def internal_error(error):
+        db.session.rollback()
         return render_template('errors/500.html'), 500
-    
+
+    # Favicon route
+    @app.route('/favicon.ico')
+    def favicon():
+        return app.send_static_file('favicon.ico')
+
+    @app.route('/favicon.svg')
+    def favicon_svg():
+        return app.send_static_file('favicon.svg')
+
     return app
 
+# Create the app instance
+app = create_app()
+
 if __name__ == '__main__':
-    app = create_app()
     app.run(debug=True) 

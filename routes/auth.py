@@ -1,17 +1,15 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.urls import url_parse
-from app import db
 from models import User, Settings
+from extensions import db
 
-auth_bp = Blueprint('auth', __name__)
+auth = Blueprint('auth', __name__)
 
-@auth_bp.route('/login', methods=['GET', 'POST'])
+@auth.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
-    
-    settings = Settings.get_settings()
     
     if request.method == 'POST':
         username = request.form['username']
@@ -32,22 +30,16 @@ def login():
         flash('Logged in successfully', 'success')
         return redirect(next_page)
     
-    return render_template('auth/login.html', settings=settings)
+    return render_template('auth/login.html')
 
-@auth_bp.route('/register', methods=['GET', 'POST'])
+@auth.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
     
-    settings = Settings.get_settings()
-    
-    if not settings.allow_registration:
-        flash('Registration is currently disabled', 'danger')
-        return redirect(url_for('main.index'))
-    
     if request.method == 'POST':
         username = request.form['username']
-        email = request.form['email']
+        email = request.form['email'] if 'email' in request.form else None
         password = request.form['password']
         confirm_password = request.form['confirm_password']
         
@@ -59,7 +51,7 @@ def register():
             flash('Username already exists', 'danger')
             return redirect(url_for('auth.register'))
         
-        if User.query.filter_by(email=email).first():
+        if email and User.query.filter_by(email=email).first():
             flash('Email already registered', 'danger')
             return redirect(url_for('auth.register'))
         
@@ -71,20 +63,18 @@ def register():
         flash('Registration successful! You can now log in.', 'success')
         return redirect(url_for('auth.login'))
     
-    return render_template('auth/register.html', settings=settings)
+    return render_template('auth/register.html')
 
-@auth_bp.route('/logout')
+@auth.route('/logout')
 @login_required
 def logout():
     logout_user()
     flash('You have been logged out', 'info')
     return redirect(url_for('main.index'))
 
-@auth_bp.route('/profile', methods=['GET', 'POST'])
+@auth.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-    settings = Settings.get_settings()
-    
     if request.method == 'POST':
         current_user.bio = request.form['bio']
         
@@ -104,4 +94,4 @@ def profile():
         flash('Profile updated successfully', 'success')
         return redirect(url_for('auth.profile'))
     
-    return render_template('auth/profile.html', settings=settings) 
+    return render_template('auth/profile.html') 

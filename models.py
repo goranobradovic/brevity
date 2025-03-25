@@ -1,23 +1,27 @@
-from datetime import datetime
+from extensions import db, login_manager
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from app import db, login_manager
+from datetime import datetime
 import markdown
 import re
+from slugify import slugify
 from sqlalchemy import event
 
 @login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+def load_user(id):
+    return User.query.get(int(id))
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), unique=True, index=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, index=True, nullable=False)
-    password_hash = db.Column(db.String(128), nullable=False)
+    username = db.Column(db.String(64), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True)
+    password_hash = db.Column(db.String(128))
     bio = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     posts = db.relationship('Post', backref='author', lazy='dynamic')
+
+    def __repr__(self):
+        return f'<User {self.username}>'
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -25,13 +29,10 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    def __repr__(self):
-        return f'<User {self.username}>'
-
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
-    slug = db.Column(db.String(120), nullable=False, unique=True, index=True)
+    slug = db.Column(db.String(100), unique=True, index=True)
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -51,26 +52,24 @@ class Post(db.Model):
     def __repr__(self):
         return f'<Post {self.title}>'
     
-    @staticmethod
-    def generate_slug(target, value, oldvalue, initiator):
-        """Generate a URL-friendly slug from the title."""
-        if value and (not target.slug or value != oldvalue):
-            # Convert to lowercase and replace spaces with hyphens
-            slug = re.sub(r'[^\w\s-]', '', value.lower())
-            slug = re.sub(r'[\s_-]+', '-', slug)
-            slug = slug.strip('-')
-            
-            # Make sure slug is unique
-            original_slug = slug
-            count = 1
-            while Post.query.filter_by(slug=slug).first() is not None:
-                slug = f"{original_slug}-{count}"
-                count += 1
-            
-            target.slug = slug
+    def generate_slug(self):
+        base_slug = slugify(self.title)
+        slug = base_slug
+        counter = 1
+        while Post.query.filter_by(slug=slug).first() is not None:
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+        return slug
 
-# Set up the event listener to generate slug before inserting/updating Post
-event.listen(Post.title, 'set', Post.generate_slug, retval=False)
+@event.listens_for(Post.title, 'set')
+def update_slug_on_title_change(target, value, oldvalue, initiator):
+    if value != oldvalue:
+        target.slug = target.generate_slug()
+
+@event.listens_for(Post, 'before_insert')
+def set_slug_before_insert(mapper, connection, target):
+    if not target.slug:
+        target.slug = target.generate_slug()
 
 class Settings(db.Model):
     id = db.Column(db.Integer, primary_key=True)
