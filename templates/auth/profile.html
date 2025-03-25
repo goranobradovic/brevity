@@ -52,7 +52,7 @@
         <ul>
             {% for post in current_user.posts %}
                 <li>
-                    <a href="{{ url_for('posts.view', post_id=post.id) }}">{{ post.title }}</a>
+                    <a href="{{ url_for('posts.view', slug=post.slug) }}">{{ post.title }}</a>
                     <span class="post-date">({{ post.created_at.strftime('%B %d, %Y') }})</span>
                     {% if not post.is_published %}<span class="post-status">[Draft]</span>{% endif %}
                 </li>

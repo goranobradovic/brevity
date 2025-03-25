@@ -24,13 +24,13 @@ def create():
         db.session.commit()
         
         flash('Post created successfully', 'success')
-        return redirect(url_for('posts.view', post_id=post.id))
+        return redirect(url_for('posts.view', slug=post.slug))
     
     return render_template('posts/create.html', settings=settings)
 
-@posts_bp.route('/<int:post_id>')
-def view(post_id):
-    post = Post.query.get_or_404(post_id)
+@posts_bp.route('/<slug>')
+def view(slug):
+    post = Post.query.filter_by(slug=slug).first_or_404()
     settings = Settings.get_settings()
     
     if not post.is_published and (not current_user.is_authenticated or current_user.id != post.user_id):
@@ -38,10 +38,16 @@ def view(post_id):
     
     return render_template('posts/view.html', post=post, settings=settings)
 
-@posts_bp.route('/<int:post_id>/edit', methods=['GET', 'POST'])
-@login_required
-def edit(post_id):
+# Keep backward compatibility with ID-based URLs
+@posts_bp.route('/id/<int:post_id>')
+def view_by_id(post_id):
     post = Post.query.get_or_404(post_id)
+    return redirect(url_for('posts.view', slug=post.slug))
+
+@posts_bp.route('/<slug>/edit', methods=['GET', 'POST'])
+@login_required
+def edit(slug):
+    post = Post.query.filter_by(slug=slug).first_or_404()
     settings = Settings.get_settings()
     
     if current_user.id != post.user_id:
@@ -58,14 +64,14 @@ def edit(post_id):
         
         db.session.commit()
         flash('Post updated successfully', 'success')
-        return redirect(url_for('posts.view', post_id=post.id))
+        return redirect(url_for('posts.view', slug=post.slug))
     
     return render_template('posts/edit.html', post=post, settings=settings)
 
-@posts_bp.route('/<int:post_id>/delete', methods=['POST'])
+@posts_bp.route('/<slug>/delete', methods=['POST'])
 @login_required
-def delete(post_id):
-    post = Post.query.get_or_404(post_id)
+def delete(slug):
+    post = Post.query.filter_by(slug=slug).first_or_404()
     
     if current_user.id != post.user_id:
         abort(403)

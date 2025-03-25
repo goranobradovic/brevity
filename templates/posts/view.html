@@ -19,8 +19,8 @@
         
         {% if current_user.is_authenticated and current_user.id == post.user_id %}
             <div class="post-actions">
-                <a href="{{ url_for('posts.edit', post_id=post.id) }}" class="button">Edit</a>
-                <form action="{{ url_for('posts.delete', post_id=post.id) }}" method="post" style="display:inline;">
+                <a href="{{ url_for('posts.edit', slug=post.slug) }}" class="button">Edit</a>
+                <form action="{{ url_for('posts.delete', slug=post.slug) }}" method="post" style="display:inline;">
                     <button type="submit" class="danger" onclick="return confirm('Are you sure you want to delete this post?')">Delete</button>
                 </form>
             </div>

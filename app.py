@@ -1,9 +1,10 @@
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from dotenv import load_dotenv
+import datetime
 
 load_dotenv()
 
@@ -16,7 +17,7 @@ def create_app():
     
     # Configuration
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-for-brevity')
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI', 'mysql://user:password@localhost/brevity')
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI', 'sqlite:///brevity.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
     # Initialize extensions
@@ -33,6 +34,22 @@ def create_app():
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(posts_bp, url_prefix='/posts')
+    
+    # Favicon handling
+    @app.route('/favicon.ico')
+    def favicon():
+        return send_from_directory(os.path.join(app.root_path, 'static'),
+                                  'favicon.ico', mimetype='image/vnd.microsoft.icon')
+    
+    @app.route('/favicon.svg')
+    def favicon_svg():
+        return send_from_directory(os.path.join(app.root_path, 'static', 'img'),
+                                  'favicon.svg', mimetype='image/svg+xml')
+    
+    # Add context processor for templates
+    @app.context_processor
+    def inject_now():
+        return {'now': datetime.datetime.utcnow()}
     
     # Error handlers
     @app.errorhandler(404)

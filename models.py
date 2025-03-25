@@ -3,6 +3,8 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db, login_manager
 import markdown
+import re
+from sqlalchemy import event
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -29,6 +31,7 @@ class User(UserMixin, db.Model):
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
+    slug = db.Column(db.String(120), nullable=False, unique=True, index=True)
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -41,6 +44,27 @@ class Post(db.Model):
     
     def __repr__(self):
         return f'<Post {self.title}>'
+    
+    @staticmethod
+    def generate_slug(target, value, oldvalue, initiator):
+        """Generate a URL-friendly slug from the title."""
+        if value and (not target.slug or value != oldvalue):
+            # Convert to lowercase and replace spaces with hyphens
+            slug = re.sub(r'[^\w\s-]', '', value.lower())
+            slug = re.sub(r'[\s_-]+', '-', slug)
+            slug = slug.strip('-')
+            
+            # Make sure slug is unique
+            original_slug = slug
+            count = 1
+            while Post.query.filter_by(slug=slug).first() is not None:
+                slug = f"{original_slug}-{count}"
+                count += 1
+            
+            target.slug = slug
+
+# Set up the event listener to generate slug before inserting/updating Post
+event.listen(Post.title, 'set', Post.generate_slug, retval=False)
 
 class Settings(db.Model):
     id = db.Column(db.Integer, primary_key=True)
