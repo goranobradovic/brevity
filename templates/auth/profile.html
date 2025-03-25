@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - {{ settings.site_name }}{% endblock %}
+
+{% block content %}
+    <h2>Your Profile</h2>
+    
+    <div class="profile-info">
+        <p><strong>Username:</strong> {{ current_user.username }}</p>
+        <p><strong>Email:</strong> {{ current_user.email }}</p>
+        <p><strong>Joined:</strong> {{ current_user.created_at.strftime('%B %d, %Y') }}</p>
+        <p><strong>Posts:</strong> {{ current_user.posts.count() }}</p>
+    </div>
+    
+    <h3>Update Your Profile</h3>
+    <form method="post">
+        <div class="form-group">
+            <label for="bio">Bio</label>
+            <textarea id="bio" name="bio">{{ current_user.bio or '' }}</textarea>
+            <small>You can use markdown for formatting</small>
+        </div>
+        
+        <div class="form-group">
+            <button type="submit">Update Profile</button>
+        </div>
+    </form>
+    
+    <h3>Change Password</h3>
+    <form method="post">
+        <div class="form-group">
+            <label for="current_password">Current Password</label>
+            <input type="password" id="current_password" name="current_password">
+        </div>
+        
+        <div class="form-group">
+            <label for="new_password">New Password</label>
+            <input type="password" id="new_password" name="new_password">
+        </div>
+        
+        <div class="form-group">
+            <label for="confirm_password">Confirm New Password</label>
+            <input type="password" id="confirm_password" name="confirm_password">
+        </div>
+        
+        <div class="form-group">
+            <button type="submit">Change Password</button>
+        </div>
+    </form>
+    
+    <h3>Your Posts</h3>
+    {% if current_user.posts.count() > 0 %}
+        <ul>
+            {% for post in current_user.posts %}
+                <li>
+                    <a href="{{ url_for('posts.view', post_id=post.id) }}">{{ post.title }}</a>
+                    <span class="post-date">({{ post.created_at.strftime('%B %d, %Y') }})</span>
+                    {% if not post.is_published %}<span class="post-status">[Draft]</span>{% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You haven't written any posts yet. <a href="{{ url_for('posts.create') }}">Write your first one!</a></p>
+    {% endif %}
+{% endblock %} 

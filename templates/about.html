@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}About - {{ settings.site_name }}{% endblock %}
+
+{% block content %}
+    <h2>About {{ settings.site_name }}</h2>
+    <p>{{ settings.site_name }} is a simple micro-blog engine powered by Python, Flask, and MySQL.</p>
+    <p>The engine is designed to be lightweight, fast, and easy to use. It offers markdown support for posts, allowing you to format your content with ease.</p>
+    
+    <h3>Features</h3>
+    <ul>
+        <li>Markdown to HTML rendering</li>
+        <li>User authentication system</li>
+        <li>Post creation, editing, and deletion</li>
+        <li>Simple and responsive design</li>
+        <li>MySQL database for content storage</li>
+    </ul>
+    
+    <h3>Technologies Used</h3>
+    <ul>
+        <li>Python</li>
+        <li>Flask web framework</li>
+        <li>MySQL database</li>
+        <li>Flask-SQLAlchemy for ORM</li>
+        <li>Flask-Login for user authentication</li>
+        <li>Python-Markdown for markdown processing</li>
+    </ul>
+{% endblock %} 

@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}New Post - {{ settings.site_name }}{% endblock %}
+
+{% block content %}
+    <h2>Create New Post</h2>
+    <form method="post">
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input type="text" id="title" name="title" required autofocus value="{{ post.title if post else '' }}">
+        </div>
+        
+        <div class="form-group">
+            <label for="content">Content (Markdown)</label>
+            <textarea id="content" name="content" required>{{ post.content if post else '' }}</textarea>
+            <small>You can use markdown for formatting</small>
+        </div>
+        
+        <div class="form-group">
+            <label>
+                <input type="checkbox" name="is_published" {% if post is not defined or post.is_published != '0' %}checked{% endif %}>
+                Publish immediately
+            </label>
+        </div>
+        
+        <div class="form-group">
+            <button type="submit">Create Post</button>
+        </div>
+    </form>
+    
+    <div class="markdown-help">
+        <h3>Markdown Quick Reference</h3>
+        <table>
+            <tr>
+                <td><code># Heading 1</code></td>
+                <td>Creates a large heading</td>
+            </tr>
+            <tr>
+                <td><code>## Heading 2</code></td>
+                <td>Creates a medium heading</td>
+            </tr>
+            <tr>
+                <td><code>**Bold text**</code></td>
+                <td>Creates <strong>bold text</strong></td>
+            </tr>
+            <tr>
+                <td><code>*Italic text*</code></td>
+                <td>Creates <em>italic text</em></td>
+            </tr>
+            <tr>
+                <td><code>[Link text](URL)</code></td>
+                <td>Creates a hyperlink</td>
+            </tr>
+            <tr>
+                <td><code>- List item</code></td>
+                <td>Creates a bulleted list item</td>
+            </tr>
+            <tr>
+                <td><code>1. List item</code></td>
+                <td>Creates a numbered list item</td>
+            </tr>
+            <tr>
+                <td><code>```python<br>code block<br>```</code></td>
+                <td>Creates a code block with syntax highlighting</td>
+            </tr>
+        </table>
+    </div>
+{% endblock %} 
