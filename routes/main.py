@@ -23,4 +23,16 @@ def index():
 def about():
     settings = get_settings()
     logger.info('Rendering about page')
-    return render_template('about.html', settings=settings) 
+    return render_template('about.html', settings=settings)
+
+class Post:
+    def to_dict(self):
+        return {
+            'slug': self.slug,
+            'title': self.title,
+            'author': self.author.username,
+            'created_at': self.created_at.strftime('%B %d, %Y'),
+            'updated_at': self.updated_at.strftime('%B %d, %Y'),
+            'html_content': self.html_content,
+            'user_id': self.user_id
+        } 
