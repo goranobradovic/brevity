@@ -3,7 +3,6 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.urls import url_parse
 from models import User, Settings
 from extensions import db
-from datetime import datetime
 
 auth = Blueprint('auth', __name__)
 
@@ -31,7 +30,8 @@ def login():
         flash('Logged in successfully', 'success')
         return redirect(next_page)
     
-    return render_template('auth/login.html')
+    settings = Settings.query.first()
+    return render_template('auth/login.html', settings=settings)
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
@@ -64,7 +64,8 @@ def register():
         flash('Registration successful! You can now log in.', 'success')
         return redirect(url_for('auth.login'))
     
-    return render_template('auth/register.html')
+    settings = Settings.query.first()
+    return render_template('auth/register.html', settings=settings)
 
 @auth.route('/logout')
 @login_required
@@ -95,4 +96,5 @@ def profile():
         flash('Profile updated successfully', 'success')
         return redirect(url_for('auth.profile'))
     
-    return render_template('auth/profile.html')
+    settings = Settings.query.first()
+    return render_template('auth/profile.html', settings=settings)
