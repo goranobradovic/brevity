@@ -60,6 +60,17 @@ class Post(db.Model):
             slug = f"{base_slug}-{counter}"
             counter += 1
         return slug
+    
+    def to_dict(self):
+        return {
+            'slug': self.slug,
+            'title': self.title,
+            'author': self.author.username,
+            'created_at': self.created_at.strftime('%B %d, %Y'),
+            'updated_at': self.updated_at.strftime('%B %d, %Y'),
+            'html_content': self.html_content,
+            'user_id': self.user_id
+        } 
 
     def __init__(self, title, content, is_published, author, slug=None):
         self.title = title
