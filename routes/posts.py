@@ -22,8 +22,9 @@ def get_posts():
 def create():
     if request.method == 'POST':
         title = request.form.get('title')
-        content = request.form.get('content')
-        post = Post(title=title, content=content, author=current_user, is_published=request.form.get('is_published', False))
+        content = request.form.get('content')   
+        is_published = request.form.get('is_published') == 'true'
+        post = Post(title=title, content=content, author=current_user, is_published=is_published)
         db.session.add(post)
         db.session.commit()
         logger.info('Post created: {}'.format(title))
