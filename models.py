@@ -61,6 +61,13 @@ class Post(db.Model):
             counter += 1
         return slug
 
+    def __init__(self, title, content, is_published, author):
+        self.title = title
+        self.content = content
+        self.is_published = is_published
+        self.author = author
+        self.slug = slugify(title) if title else "default-slug"  # Handle None case
+
 @event.listens_for(Post.title, 'set')
 def update_slug_on_title_change(target, value, oldvalue, initiator):
     if value != oldvalue:
