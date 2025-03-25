@@ -25,7 +25,7 @@
         
         <div class="form-group">
             <button type="submit">Update Post</button>
-            <a href="{{ url_for('posts.view', post_id=post.id) }}" class="button">Cancel</a>
+            <a href="{{ url_for('posts.view', slug=post.slug) }}" class="button">Cancel</a>
         </div>
     </form>
     
