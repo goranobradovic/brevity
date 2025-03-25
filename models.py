@@ -53,7 +53,7 @@ class Post(db.Model):
         return f'<Post {self.title}>'
     
     def generate_slug(self):
-        base_slug = slugify(self.title)
+        base_slug = slugify(self.title if self.title else "default-slug")
         slug = base_slug
         counter = 1
         while Post.query.filter_by(slug=slug).first() is not None:
