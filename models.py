@@ -40,7 +40,13 @@ class Post(db.Model):
     
     @property
     def html_content(self):
-        return markdown.markdown(self.content, extensions=['fenced_code', 'tables'])
+        return markdown.markdown(self.content, extensions=['fenced_code', 'tables', 'mdx_math'], 
+                               extension_configs={
+                                   'mdx_math': {
+                                       'enable_dollar_delimiter': True,
+                                       'add_preview': True
+                                   }
+                               })
     
     def __repr__(self):
         return f'<Post {self.title}>'

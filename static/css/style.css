@@ -246,16 +246,40 @@ code {
     }
     
     .nav-links, .auth-links {
-        justify-content: space-between;
+        flex-wrap: wrap;
     }
 }
 
 /* Footer */
 footer {
-    margin-top: 30px;
-    padding-top: 20px;
-    border-top: 1px solid #333;
+    margin-top: 20px;
     text-align: center;
     color: #aaa;
     font-size: 14px;
+}
+
+/* LaTeX Formulas */
+.katex {
+    font-size: 1.1em;
+}
+
+.katex-display {
+    padding: 1em 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.post-content .katex-display {
+    background-color: #1a1a1a;
+    border-radius: 4px;
+    padding: 1em;
+    margin: 1em 0;
+}
+
+/* Improves the display of LaTeX on mobile devices */
+@media (max-width: 768px) {
+    .katex-display {
+        max-width: 100%;
+        font-size: 0.9em;
+    }
 } 
