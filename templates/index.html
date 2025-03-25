@@ -3,8 +3,8 @@
 {% block content %}
     <h2>Recent Posts</h2>
     
-    {% if posts.items %}
-        {% for post in posts.items %}
+    {% if posts %}
+        {% for post in posts %}
             <article class="post">
                 <h3 class="post-title"><a href="{{ url_for('posts.view', slug=post.slug) }}">{{ post.title }}</a></h3>
                 <div class="post-meta">
@@ -29,21 +29,6 @@
             </article>
         {% endfor %}
         
-        {% if posts.pages > 1 %}
-            <div class="pagination">
-                {% for page_num in posts.iter_pages() %}
-                    {% if page_num %}
-                        {% if page_num == posts.page %}
-                            <span class="active">{{ page_num }}</span>
-                        {% else %}
-                            <a href="{{ url_for('main.index', page=page_num) }}">{{ page_num }}</a>
-                        {% endif %}
-                    {% else %}
-                        <span>...</span>
-                    {% endif %}
-                {% endfor %}
-            </div>
-        {% endif %}
     {% else %}
         <p>No posts yet. {% if current_user.is_authenticated %}<a href="{{ url_for('posts.create') }}">Write the first one!</a>{% endif %}</p>
     {% endif %}

@@ -2,6 +2,7 @@ from flask import Flask, render_template
 import os
 from dotenv import load_dotenv
 from extensions import db, migrate, login_manager
+from datetime import datetime
 
 # Load environment variables
 load_dotenv()
@@ -55,6 +56,10 @@ def create_app():
     @app.route('/favicon.svg')
     def favicon_svg():
         return app.send_static_file('favicon.svg')
+        
+    @app.context_processor
+    def inject_now():
+        return {'now': datetime.utcnow()} 
 
     return app
 
