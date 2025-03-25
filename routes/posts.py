@@ -22,7 +22,7 @@ def create():
     settings = get_settings()
     return render_template('posts/create.html', settings=settings)
 
-@posts.route('/<slug>')
+@posts.route('/posts/<slug>')
 def view(slug):
     post = Post.query.filter_by(slug=slug).first_or_404()
     settings = get_settings()
@@ -34,7 +34,7 @@ def view_by_id(post_id):
     post = Post.query.get_or_404(post_id)
     return redirect(url_for('posts.view', slug=post.slug))
 
-@posts.route('/<slug>/edit', methods=['GET', 'POST'])
+@posts.route('/posts/<slug>/edit', methods=['GET', 'POST'])
 @login_required
 def edit(slug):
     post = Post.query.filter_by(slug=slug).first_or_404()
@@ -48,7 +48,7 @@ def edit(slug):
     settings = get_settings()
     return render_template('posts/edit.html', post=post, settings=settings)
 
-@posts.route('/<slug>/delete', methods=['POST'])
+@posts.route('/posts/<slug>/delete', methods=['POST'])
 @login_required
 def delete(slug):
     post = Post.query.filter_by(slug=slug).first_or_404()
