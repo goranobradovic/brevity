@@ -4,13 +4,16 @@ from extensions import db
 
 main = Blueprint('main', __name__)
 
+def get_settings():
+    return Settings.query.first()
+
 @main.route('/')
 def index():
-    settings = Settings.query.first()
+    settings = get_settings()
     posts = Post.query.order_by(Post.created_at.desc()).all()
     return render_template('index.html', posts=posts, settings=settings)
 
 @main.route('/about')
 def about():
-    settings = Settings.query.first()
+    settings = get_settings()
     return render_template('about.html', settings=settings) 

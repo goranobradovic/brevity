@@ -1,10 +1,13 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, abort
 from flask_login import login_required, current_user
-from models import Post
+from models import Post, Settings
 from extensions import db
 from markdown import markdown
 
 posts = Blueprint('posts', __name__)
+
+def get_settings():
+    return Settings.query.first()
 
 @posts.route('/create', methods=['GET', 'POST'])
 @login_required
@@ -16,12 +19,14 @@ def create():
         db.session.add(post)
         db.session.commit()
         return redirect(url_for('posts.view', slug=post.slug))
-    return render_template('posts/create.html')
+    settings = get_settings()
+    return render_template('posts/create.html', settings=settings)
 
 @posts.route('/<slug>')
 def view(slug):
     post = Post.query.filter_by(slug=slug).first_or_404()
-    return render_template('posts/view.html', post=post)
+    settings = get_settings()
+    return render_template('posts/view.html', post=post, settings=settings)
 
 # Keep backward compatibility with ID-based URLs
 @posts.route('/id/<int:post_id>')
@@ -40,7 +45,8 @@ def edit(slug):
         post.content = request.form.get('content')
         db.session.commit()
         return redirect(url_for('posts.view', slug=post.slug))
-    return render_template('posts/edit.html', post=post)
+    settings = get_settings()
+    return render_template('posts/edit.html', post=post, settings=settings)
 
 @posts.route('/<slug>/delete', methods=['POST'])
 @login_required

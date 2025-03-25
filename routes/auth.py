@@ -6,6 +6,9 @@ from extensions import db
 
 auth = Blueprint('auth', __name__)
 
+def get_settings():
+    return Settings.query.first()
+
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -30,7 +33,7 @@ def login():
         flash('Logged in successfully', 'success')
         return redirect(next_page)
     
-    settings = Settings.query.first()
+    settings = get_settings()
     return render_template('auth/login.html', settings=settings)
 
 @auth.route('/register', methods=['GET', 'POST'])
@@ -64,7 +67,7 @@ def register():
         flash('Registration successful! You can now log in.', 'success')
         return redirect(url_for('auth.login'))
     
-    settings = Settings.query.first()
+    settings = get_settings()
     return render_template('auth/register.html', settings=settings)
 
 @auth.route('/logout')
@@ -96,5 +99,5 @@ def profile():
         flash('Profile updated successfully', 'success')
         return redirect(url_for('auth.profile'))
     
-    settings = Settings.query.first()
+    settings = get_settings()
     return render_template('auth/profile.html', settings=settings)
