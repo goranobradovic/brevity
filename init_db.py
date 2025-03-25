@@ -68,6 +68,7 @@ This is a simple micro-blog engine powered by Python and Flask.
 Enjoy your new blog!
             """,
             is_published=True,
+            slug="welcome-to-brevity",
             author=admin
         )
         db.session.add(post)
