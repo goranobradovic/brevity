@@ -3,6 +3,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.urls import url_parse
 from models import User, Settings
 from extensions import db
+from datetime import datetime
 
 auth = Blueprint('auth', __name__)
 
@@ -94,4 +95,4 @@ def profile():
         flash('Profile updated successfully', 'success')
         return redirect(url_for('auth.profile'))
     
-    return render_template('auth/profile.html') 
+    return render_template('auth/profile.html')
