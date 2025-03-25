@@ -1,8 +1,13 @@
+import logging
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.urls import url_parse
 from models import User, Settings
 from extensions import db
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 auth = Blueprint('auth', __name__)
 
@@ -23,6 +28,7 @@ def login():
         
         if user is None or not user.check_password(password):
             flash('Invalid username or password', 'danger')
+            logger.error(f'Login failed for username: {username}')
             return redirect(url_for('auth.login'))
         
         login_user(user, remember=remember_me)
@@ -49,14 +55,17 @@ def register():
         
         if password != confirm_password:
             flash('Passwords do not match', 'danger')
+            logger.error('Password mismatch during registration')
             return redirect(url_for('auth.register'))
         
         if User.query.filter_by(username=username).first():
             flash('Username already exists', 'danger')
+            logger.error(f'Username already exists: {username}')
             return redirect(url_for('auth.register'))
         
         if email and User.query.filter_by(email=email).first():
             flash('Email already registered', 'danger')
+            logger.error(f'Email already registered: {email}')
             return redirect(url_for('auth.register'))
         
         user = User(username=username, email=email)
@@ -86,10 +95,12 @@ def profile():
         if 'current_password' in request.form and request.form['current_password']:
             if not current_user.check_password(request.form['current_password']):
                 flash('Current password is incorrect', 'danger')
+                logger.error('Current password incorrect for user: {}'.format(current_user.username))
                 return redirect(url_for('auth.profile'))
             
             if request.form['new_password'] != request.form['confirm_password']:
                 flash('New passwords do not match', 'danger')
+                logger.error('New password mismatch for user: {}'.format(current_user.username))
                 return redirect(url_for('auth.profile'))
             
             current_user.set_password(request.form['new_password'])
